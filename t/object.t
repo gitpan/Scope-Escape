@@ -1,7 +1,7 @@
 use warnings;
 use strict;
 
-use Test::More tests => 28;
+use Test::More tests => 36;
 
 BEGIN { use_ok "Scope::Escape", qw(
 	current_escape_function current_escape_continuation
@@ -137,6 +137,42 @@ sub {
 }->();
 
 eval { Scope::Escape::Continuation::invalidate(sub{}); };
+like $@, qr/\AScope::Escape::Continuation method invoked on wrong type of /;
+
+is_deeply [sub{
+	my $c = current_escape_function;
+	!!Scope::Escape::Continuation::as_function($c);
+}->()], [!!1];
+
+is_deeply [sub{
+	my $c = current_escape_continuation;
+	!!Scope::Escape::Continuation::as_function($c);
+}->()], [!!1];
+
+is_deeply [sub{
+	my $c = current_escape_continuation;
+	!!$c->as_function();
+}->()], [!!1];
+
+eval { Scope::Escape::Continuation::as_function(sub{}); };
+like $@, qr/\AScope::Escape::Continuation method invoked on wrong type of /;
+
+is_deeply [sub{
+	my $c = current_escape_function;
+	!!Scope::Escape::Continuation::as_continuation($c);
+}->()], [!!1];
+
+is_deeply [sub{
+	my $c = current_escape_continuation;
+	!!Scope::Escape::Continuation::as_continuation($c);
+}->()], [!!1];
+
+is_deeply [sub{
+	my $c = current_escape_continuation;
+	!!$c->as_continuation();
+}->()], [!!1];
+
+eval { Scope::Escape::Continuation::as_continuation(sub{}); };
 like $@, qr/\AScope::Escape::Continuation method invoked on wrong type of /;
 
 1;

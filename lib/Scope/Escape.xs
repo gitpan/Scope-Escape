@@ -29,6 +29,10 @@ static SV *newSV_type(svtype type)
 }
 #endif /* !newSV_type */
 
+#ifndef SvRV_set
+# define SvRV_set(rv, tgt) (SvRV(rv) = (tgt))
+#endif /* !SvRV_set */
+
 #ifndef G_WANT
 # define G_WANT (G_SCALAR|G_ARRAY|G_VOID)
 #endif /* !G_WANT */
@@ -87,13 +91,17 @@ static SV *newSV_type(svtype type)
  * The CvPADLIST is a pad-style AV, with its first two entries being
  * sufficiently normal pad structure to satisfy pad_undef().  The third
  * entry is an SV whose PV points to a struct continuation_guts.
+ * There is an optional fourth entry, described in the next paragraph.
  *
  * The CV is of the XSUB type (and hence doesn't use its CvPADLIST slot
  * normally), and the underlying XSUB is xsfunc_go(), which implements
- * control transfer through the continuation.  Optionally, the CV
- * can be blessed into Scope::Escape::Continuation, which provides a
- * method interface.  The method code doesn't actually care whether the
- * CV is blessed.
+ * control transfer through the continuation.  Optionally, the CV can
+ * be blessed into Scope::Escape::Continuation, which provides a method
+ * interface.  The method code doesn't actually care whether the CV is
+ * blessed.  If the user wants it both ways, there can be two CVs pointing
+ * at the same struct continuation_guts, with differing blessedness.
+ * To avoid unnecessary cloning, they each have a weak reference to the
+ * other, held in the fourth pad slot.
  *
  * The struct continuation_guts is mainly concerned with describing the
  * context that it is intended to continue from.  It also has a validity
@@ -192,7 +200,8 @@ enum {
 	CONTPAD_NAMES,
 	CONTPAD_PAD,
 	CONTPAD_GUT,
-	CONTPAD_SIZE
+	CONTPAD_BASE_SIZE,
+	CONTPAD_OTHER_BLESSEDNESS = CONTPAD_BASE_SIZE
 };
 
 static void xsfunc_go(pTHX_ CV *contsub);
@@ -208,10 +217,15 @@ static CV *contsub_from_contref(SV *contref)
 	return contsub;
 }
 
+static SV *contgutsv_from_contsub(CV *contsub)
+{
+	return *av_fetch(CvPADLIST(contsub), CONTPAD_GUT, 0);
+}
+
 static struct continuation_guts *contgut_from_contsub(CV *contsub)
 {
 	return (struct continuation_guts *)
-		SvPVX(*av_fetch(CvPADLIST(contsub), CONTPAD_GUT, 0));
+		SvPVX(contgutsv_from_contsub(contsub));
 }
 
 static struct continuation_guts *contgut_from_contref(SV *contref)
@@ -220,6 +234,56 @@ static struct continuation_guts *contgut_from_contref(SV *contref)
 }
 
 static HV *stash_esccont;
+
+static SV *make_contref_from_contgutsv(SV *contgutsv, bool blessp)
+{
+	CV *contsub = (CV*)newSV_type(SVt_PVCV);
+	SV *contref = sv_2mortal(newRV_noinc((SV*)contsub));
+	AV *contpad = newAV();
+	AvREAL_off(contpad);
+	av_extend(contpad, CONTPAD_BASE_SIZE-1);
+	av_store(contpad, CONTPAD_NAMES, (SV*)newAV());
+	{
+		AV *pad = newAV();
+		av_store(pad, 0, &PL_sv_undef);
+		av_store(contpad, CONTPAD_PAD, (SV*)pad);
+	}
+	CvPADLIST(contsub) = contpad;
+	av_store(contpad, CONTPAD_GUT, SvREFCNT_inc(contgutsv));
+	CvISXSUB_on(contsub);
+	CvXSUB(contsub) = xsfunc_go;
+	if(blessp) sv_bless(contref, stash_esccont);
+	return contref;
+}
+
+static SV *make_contref_from_contsub(CV *contsub, bool blessp)
+{
+	AV *padlist;
+	SV **wr_ptr, *wr, *hr;
+	CV *othersub;
+	if(!!SvOBJECT((SV*)contsub) == !!blessp)
+		return sv_2mortal(newRV_inc((SV*)contsub));
+	padlist = CvPADLIST(contsub);
+	wr_ptr = av_fetch(padlist, CONTPAD_OTHER_BLESSEDNESS, 0);
+	wr = wr_ptr ? *wr_ptr : NULL;
+	if(wr && SvROK(wr))
+		return sv_2mortal(newRV_inc(SvRV(wr)));
+	hr = make_contref_from_contgutsv(contgutsv_from_contsub(contsub),
+		blessp);
+	othersub = (CV*)SvRV(hr);
+	if(wr && wr != &PL_sv_undef) {
+		SvRV_set(wr, SvREFCNT_inc((SV*)othersub));
+		SvROK_on(wr);
+	} else {
+		wr = newRV_inc((SV*)othersub);
+		av_store(padlist, CONTPAD_OTHER_BLESSEDNESS, wr);
+	}
+	sv_rvweaken(wr);
+	wr = newRV_inc((SV*)contsub);
+	sv_rvweaken(wr);
+	av_store(CvPADLIST(othersub), CONTPAD_OTHER_BLESSEDNESS, wr);
+	return hr;
+}
 
 /*
  * how Perl context unwinding works
@@ -548,49 +612,29 @@ static void xsfunc_go(pTHX_ CV *contsub)
 
 static OP *caught_pp_current_escape_continuation(pTHX)
 {
-	CV *contsub;
-	AV *contpad;
 	SV *contref, *contgutsv;
 	struct continuation_guts *contgut;
-	contsub = (CV*)newSV_type(SVt_PVCV);
-	contref = sv_2mortal(newRV_noinc((SV*)contsub));
-	contpad = newAV();
-	AvREAL_off(contpad);
-	av_extend(contpad, CONTPAD_SIZE-1);
-	av_store(contpad, CONTPAD_NAMES, (SV*)newAV());
-	{
-		AV *pad = newAV();
-		av_store(pad, 0, &PL_sv_undef);
-		av_store(contpad, CONTPAD_PAD, (SV*)pad);
-	}
-	CvPADLIST(contsub) = contpad;
-	{
-		contgutsv = newSV_type(SVt_PV);
-		SAVEFREESV(contgutsv);
-		Newx(contgut, 1, struct continuation_guts);
-		contgut->nul = 0;
-		SvPV_set(contgutsv, (char *)contgut);
-		SvLEN_set(contgutsv, sizeof(struct continuation_guts));
-		SvCUR_set(contgutsv,
-			STRUCT_OFFSET(struct continuation_guts, nul));
-		av_store(contpad, CONTPAD_GUT, SvREFCNT_inc(contgutsv));
-		contgut->jmpenv = PL_top_env;
-		contgut->stackinfo = PL_curstackinfo;
-		contgut->leaveop = cUNOPx(PL_op)->op_first;
-		contgut->cxstackix = cxstack_ix;
-		contgut->savestackix = PL_savestack_ix;
-		SAVEVPTR(top_contgut);
-		contgut->next = top_contgut;
-		top_contgut = contgut;
-		contgut->may_be_valid = 0;
-		SAVEBOOL(contgut->may_be_valid);
-		contgut->may_be_valid = 1;
-		if(sanity_checking_enabled) check_cont_leaveop(contgut);
-	}
-	CvISXSUB_on(contsub);
-	CvXSUB(contsub) = xsfunc_go;
-	if(PL_op->op_private & 1)
-		sv_bless(contref, stash_esccont);
+	contgutsv = newSV_type(SVt_PV);
+	SAVEFREESV(contgutsv);
+	Newx(contgut, 1, struct continuation_guts);
+	contgut->nul = 0;
+	SvPV_set(contgutsv, (char *)contgut);
+	SvLEN_set(contgutsv, sizeof(struct continuation_guts));
+	SvCUR_set(contgutsv, STRUCT_OFFSET(struct continuation_guts, nul));
+	contgut->jmpenv = PL_top_env;
+	contgut->stackinfo = PL_curstackinfo;
+	contgut->leaveop = cUNOPx(PL_op)->op_first;
+	contgut->cxstackix = cxstack_ix;
+	contgut->savestackix = PL_savestack_ix;
+	SAVEVPTR(top_contgut);
+	contgut->next = top_contgut;
+	top_contgut = contgut;
+	contgut->may_be_valid = 0;
+	SAVEBOOL(contgut->may_be_valid);
+	contgut->may_be_valid = 1;
+	if(sanity_checking_enabled) check_cont_leaveop(contgut);
+	contref = make_contref_from_contgutsv(contgutsv,
+			PL_op->op_private & 1);
 	{
 		dSP;
 		XPUSHs(contref);
@@ -746,6 +790,10 @@ static void my_peep(pTHX_ OP *first)
 static CV *THX_rvop_cv(pTHX_ OP *rvop)
 {
 	switch(rvop->op_type) {
+		case OP_CONST: {
+			SV *rv = cSVOPx_sv(rvop);
+			return SvROK(rv) ? (CV*)SvRV(rv) : NULL;
+		} break;
 		case OP_GV: return GvCV(cGVOPx_gv(rvop));
 		default: return NULL;
 	}
@@ -851,3 +899,21 @@ invalidate(SV *contref)
 PROTOTYPE: $
 CODE:
 	contgut_from_contref(contref)->may_be_valid = 0;
+
+SV *
+as_function(SV *contref)
+PROTOTYPE: $
+CODE:
+	RETVAL = make_contref_from_contsub(contsub_from_contref(contref), 0);
+	SvREFCNT_inc(RETVAL);
+OUTPUT:
+	RETVAL
+
+SV *
+as_continuation(SV *contref)
+PROTOTYPE: $
+CODE:
+	RETVAL = make_contref_from_contsub(contsub_from_contref(contref), 1);
+	SvREFCNT_inc(RETVAL);
+OUTPUT:
+	RETVAL

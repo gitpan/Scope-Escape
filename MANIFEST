@@ -9,7 +9,6 @@ lib/Scope/.cvsignore
 lib/Scope/Escape.pm
 lib/Scope/Escape.xs
 lib/Scope/Escape/Continuation.pod
-t/as_function.t
 t/catcher_escape.t
 t/catcher_eval.t
 t/cross_stacks.t
@@ -31,9 +30,12 @@ t/from_loop_until.t
 t/from_loop_while.t
 t/from_null.t
 t/from_sub.t
+t/leximport.t
 t/multi.t
 t/object.t
+t/op_as_function.t
 t/peep.t
 t/pod_cvg.t
 t/pod_syn.t
+t/repackage.t
 SIGNATURE    Added here by Module::Build

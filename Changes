@@ -1,3 +1,14 @@
+version 0.001; 2010-03-30
+
+  * make current_escape_{function,continuation} operators compile
+    correctly when imported lexically via Lexical::Import
+
+  * new S::E::Continuation methods as_{function,continuation} to
+    provide access to a continuation in both unblessed and blessed forms
+    regardless of the form in which it was created
+
+  * include parent in dependency list
+
 version 0.000; 2010-03-23
 
   * initial released version

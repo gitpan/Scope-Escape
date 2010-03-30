@@ -6,7 +6,6 @@ use Module::Build;
 
 Module::Build->new(
 	module_name => "Scope::Escape",
-	dist_version => "0.000",
 	license => "perl",
 	configure_requires => {
 		"Module::Build" => 0,
@@ -23,6 +22,7 @@ Module::Build->new(
 	requires => {
 		"Exporter" => 0,
 		"XSLoader" => 0,
+		"parent" => 0,
 		"perl" => "5.008001",
 		"strict" => 0,
 		"warnings" => 0,

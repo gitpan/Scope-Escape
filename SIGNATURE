@@ -15,17 +15,16 @@ not run its Makefile.PL or Build.PL.
 Hash: SHA1
 
 SHA1 1d7a103545c57302b44119d0b63f1294c0a898f5 .cvsignore
-SHA1 641d9da7ec4480433e2efc9b7543f3e0829eecd6 Build.PL
-SHA1 b6fa09387d0566b344db23786d8d92e2fe65977b Changes
-SHA1 73bf092f0f5ed022dab9b6228bafb7b2030c97b2 MANIFEST
-SHA1 81db75c6fdda50c4df78a70acb05a08a175adb21 META.yml
+SHA1 3c345ce7acb507b3de08893f885ddaa3cf356f54 Build.PL
+SHA1 2cdd53e496a3ae66cade7de86aad5c30bed54422 Changes
+SHA1 04973598d1f5533138fcc651a8528910ae7bdbdd MANIFEST
+SHA1 3cfb8b29061bd07dcd4c5397433c7637ad3d0f89 META.yml
 SHA1 f770a9a0c886cde55403b1c006cc902fab1c7c31 Makefile.PL
 SHA1 ffa8ba5667e31873781fa4fc8de8a001a6319fc5 README
 SHA1 da97efc18cd78eb50b0eb2f58aad47b6ed399e8c lib/Scope/.cvsignore
-SHA1 8968d308397b9022344aa76d79db142c25a54b76 lib/Scope/Escape.pm
-SHA1 3774f6a00903a708f56767969ed98d92215d32a6 lib/Scope/Escape.xs
-SHA1 ad0d3e36573634326c02fb037aa33cadafcaa8ca lib/Scope/Escape/Continuation.pod
-SHA1 b65c8128a67d4d1885128e6fcc039b05dd4ea12c t/as_function.t
+SHA1 06dfb49d27135165516b9c553aecf42f6f734d1c lib/Scope/Escape.pm
+SHA1 f057eceeacbe0dbe883cef44217ddd70ffb310fe lib/Scope/Escape.xs
+SHA1 dcca0ef558ca5f614bf0571290af7203e49a8a4c lib/Scope/Escape/Continuation.pod
 SHA1 e0075d9fa9530701d2f6a0ba72b5c9a9bc97e948 t/catcher_escape.t
 SHA1 1a457848ed1023c7458188e190810d7a23ab2090 t/catcher_eval.t
 SHA1 d53d8b9994c1d727499c6079aa3a112649a09aa6 t/cross_stacks.t
@@ -47,15 +46,18 @@ SHA1 77ce7dfca1f8e922bc0eb7f57b9017f163dc42d3 t/from_loop_until.t
 SHA1 b1405dc840ef50fdedde9d4abac03c9f64f3f511 t/from_loop_while.t
 SHA1 bf2f0283144b16a780cc3bbd6aa0ff11956f1f43 t/from_null.t
 SHA1 fa62e470a92f349e70d6022460a0800b95157d59 t/from_sub.t
+SHA1 e362565876d4a901d5194ed7d7542dff64bfe8ec t/leximport.t
 SHA1 a8cd73f60dc3680d33a13708aa8f42443805ed70 t/multi.t
-SHA1 cd0794788543e8b03a4e9d0a372c7c0bd81afca7 t/object.t
+SHA1 e75c9529fd53e7ce1dd3e4ebd234614d91f06df2 t/object.t
+SHA1 b65c8128a67d4d1885128e6fcc039b05dd4ea12c t/op_as_function.t
 SHA1 7778806eb20abc15ff0cb95fa267f5a58390b66c t/peep.t
 SHA1 0e141eecf3ca4903ef38d9413b5403a9ddb0392f t/pod_cvg.t
 SHA1 74a957cd8b93f25672ecc6aa578a671d084dd343 t/pod_syn.t
+SHA1 fa6eadc8c57b7073fef349f5fd1cf535888679e7 t/repackage.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.9 (GNU/Linux)
 
-iEYEARECAAYFAkuoEzMACgkQOV9mt2VyAVE5bgCeLHK0iPjMxlMcvb+OXiLulg3L
-A/MAnRm/mGRW7zgnsVYdh2+sPKnZWRhR
-=Mt5i
+iEYEARECAAYFAkuyXD0ACgkQOV9mt2VyAVEU/QCfTKX6IyuekECMeK+U/hp65Pvx
+8CgAoIPQ4yHM+RgHZ2A281GVggCqUUuq
+=hnjN
 -----END PGP SIGNATURE-----

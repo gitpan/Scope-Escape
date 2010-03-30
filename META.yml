@@ -23,16 +23,17 @@ name: Scope-Escape
 provides:
   Scope::Escape:
     file: lib/Scope/Escape.pm
-    version: 0.000
+    version: 0.001
   Scope::Escape::Continuation:
     file: lib/Scope/Escape.pm
-    version: 0.000
+    version: 0.001
 requires:
   Exporter: 0
   XSLoader: 0
+  parent: 0
   perl: 5.008001
   strict: 0
   warnings: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.000
+version: 0.001

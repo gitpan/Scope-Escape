@@ -262,7 +262,7 @@ package Scope::Escape;
 use warnings;
 use strict;
 
-our $VERSION = "0.000";
+our $VERSION = "0.001";
 
 use parent "Exporter";
 our @EXPORT_OK = qw(current_escape_function current_escape_continuation);
@@ -272,7 +272,7 @@ XSLoader::load(__PACKAGE__, $VERSION);
 
 {
 	package Scope::Escape::Continuation;
-	our $VERSION = "0.000";
+	our $VERSION = "0.001";
 }
 
 =head1 OPERATORS
