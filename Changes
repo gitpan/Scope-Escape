@@ -1,3 +1,18 @@
+version 0.002; 2010-05-23
+
+  * update for new PL_restartjmpenv unwinding mechanism in perl 5.13.1
+    and above
+
+  * remove from documentation most of the discussion about stack
+    unwinding, which has moved to the documentation of Scope::Cleanup
+
+  * in documentation, add Scope::Cleanup and Scope::Escape::Sugar to
+    "see also" list
+
+  * in t/die.t and t/multi.t, require Scope::Upper version 0.08 or later
+    if Scope::Upper is to be used, due to earlier versions corrupting
+    the stack when reap() is used and thus causing false test failures
+
 version 0.001; 2010-03-30
 
   * make current_escape_{function,continuation} operators compile

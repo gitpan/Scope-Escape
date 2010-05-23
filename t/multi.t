@@ -2,7 +2,7 @@ use warnings;
 use strict;
 
 BEGIN {
-	eval { require Scope::Upper };
+	eval { require Scope::Upper; Scope::Upper->VERSION(0.08); };
 	if($@ ne "") {
 		require Test::More;
 		Test::More::plan(skip_all => "no Scope::Upper");

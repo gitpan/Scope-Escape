@@ -14,7 +14,7 @@ configure_requires:
   perl: 5.008001
 distribution_type: module
 dynamic_config: 0
-generated_by: 'Module::Build version 0.3603'
+generated_by: 'Module::Build version 0.3607'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -23,10 +23,10 @@ name: Scope-Escape
 provides:
   Scope::Escape:
     file: lib/Scope/Escape.pm
-    version: 0.001
+    version: 0.002
   Scope::Escape::Continuation:
     file: lib/Scope/Escape.pm
-    version: 0.001
+    version: 0.002
 requires:
   Exporter: 0
   XSLoader: 0
@@ -36,4 +36,4 @@ requires:
   warnings: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.001
+version: 0.002

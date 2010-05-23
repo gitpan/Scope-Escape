@@ -143,7 +143,7 @@ unlike the loop and conditional statements where the keyword comes first.
 
 =back
 
-=head1 STACK UNWINDING
+=head1 INACCESSIBLE STACK FRAMES
 
 Using Perl's native control constructs, an C<eval> block (or one of
 its several equivalents) sets a limit on how far a non-local control
@@ -168,40 +168,6 @@ exited, the target becomes accessible again, and the continuation can
 be used normally.  The details of this may change in the future, though
 it is likely that there will always be some types of stack frame that
 are impervious.
-
-While returning (locally or non-locally) to an outer stack frame,
-things must be done automatically at each stage, depending on the
-circumstances in which the stack frames were created.  Variables that
-were given dynamically-local values (with C<local>) are restored to
-their previous values.  Objects used by the stack frames, that are
-not referenced elsewhere, are destroyed.  These things happen in the
-reverse of the order in which their stack frames were established.
-This is referred to as "unwinding the stack".
-
-It is sometimes desired to establish some code that will be automatically
-executed during unwinding, for example to release resources that are not
-reified as objects.  A common way of doing this in Perl, implemented
-in the L<End> module, is to create a blessed object whose C<DESTROY>
-method will perform the desired action, and hold a reference to it in
-a lexical variable.  If the object is not otherwise touched, then upon
-unwinding its destructor will fire.  This isn't really a clean approach
-for arbitrary cleanup code, which is more concerned with its specific
-stack frame than with a specific object.  A better way to run arbitrary
-cleanup code is by the function L<Scope::Upper/reap>, which registers
-code directly to run during unwinding, without any intermediation.
-
-An object destructor is run inside an implicit C<eval> block.  This
-prevents it from making any non-local control transfer outside the
-confines of the destructor.  This is an appropriate limitation to put
-on object destructors, but is not so appropriate for code associated
-with a specific stack frame.  Code run directly is not so wrapped, and
-is free to make non-local control transfers.  This is well behaved when
-the unwinding is due to the use of an escape continuation, though there
-are some restrictions described in the next section.  When unwinding is
-due to one of Perl's native mechanisms, however, critical parts of the
-stack can be seen in an inconsistent state, which interferes with some
-non-local transfers that ought to be valid.  This is because Perl doesn't
-expect arbitrary code to run without an C<eval> block during unwinding.
 
 =head1 CONTINUATION VALIDITY
 
@@ -262,7 +228,7 @@ package Scope::Escape;
 use warnings;
 use strict;
 
-our $VERSION = "0.001";
+our $VERSION = "0.002";
 
 use parent "Exporter";
 our @EXPORT_OK = qw(current_escape_function current_escape_continuation);
@@ -272,7 +238,7 @@ XSLoader::load(__PACKAGE__, $VERSION);
 
 {
 	package Scope::Escape::Continuation;
-	our $VERSION = "0.001";
+	our $VERSION = "0.002";
 }
 
 =head1 OPERATORS
@@ -313,7 +279,9 @@ prefer L</current_escape_function>.
 
 =head1 SEE ALSO
 
+L<Scope::Cleanup>,
 L<Scope::Escape::Continuation>,
+L<Scope::Escape::Sugar>,
 L<Scope::Upper>
 
 =head1 AUTHOR

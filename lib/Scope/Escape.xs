@@ -79,9 +79,15 @@ static SV *newSV_type(svtype type)
 # define Op_pmreplroot op_pmreplroot
 #endif /* <5.9.5 */
 
-#define CATCHER_USES_JMPENV \
-	(PERL_VERSION_GE(5,9,3) || \
-	 (!PERL_VERSION_GE(5,9,0) && PERL_VERSION_GE(5,8,9)))
+#define CATCHER_USES_RESTART_JMPENV PERL_VERSION_GE(5,13,1)
+
+#define CATCHER_USES_GHOST_JMPENV \
+	(!CATCHER_USES_RESTART_JMPENV && \
+	 (PERL_VERSION_GE(5,9,3) || \
+	  (!PERL_VERSION_GE(5,9,0) && PERL_VERSION_GE(5,8,9))))
+
+#define CATCHER_USES_CURSTACKINFO \
+	(!CATCHER_USES_RESTART_JMPENV && !CATCHER_USES_GHOST_JMPENV)
 
 /*
  * continuation structure
@@ -590,7 +596,7 @@ static void xsfunc_go(pTHX_ CV *contsub)
 	}
 	PL_restartop = contgut->leaveop;
 	/*warn("jumping for %p\n", contgut);*/
-#if CATCHER_USES_JMPENV
+#if CATCHER_USES_GHOST_JMPENV
 	{
 		/*
 		 * Add fake CXt_EVAL context, appearing to have been just
@@ -606,7 +612,10 @@ static void xsfunc_go(pTHX_ CV *contsub)
 		evalcx->blk_eval.cur_top_env = contgut->jmpenv;
 		cxstack_ix--;
 	}
-#endif /* CATCHER_USES_JMPENV */
+#endif /* CATCHER_USES_GHOST_JMPENV */
+#if CATCHER_USES_RESTART_JMPENV
+	PL_restartjmpenv = contgut->jmpenv;
+#endif /* CATCHER_USES_RESTART_JMPENV */
 	JMPENV_JUMP(3);
 }
 
@@ -647,9 +656,9 @@ static OP *docatch_for_pp_current_escape_continuation(pTHX)
 {
 	/* the logic here must (mostly) match docatch() */
 	OP *curop = PL_op;
-#if !CATCHER_USES_JMPENV
+#if CATCHER_USES_CURSTACKINFO
 	PERL_SI *cursi = PL_curstackinfo;
-#endif /* !CATCHER_USES_JMPENV */
+#endif /* CATCHER_USES_CURSTACKINFO */
 	dJMPENV;
 	int ret;
 	JMPENV_PUSH(ret);
@@ -665,13 +674,20 @@ static OP *docatch_for_pp_current_escape_continuation(pTHX)
 		case 3: {
 			PERL_CONTEXT *evalcx = &cxstack[cxstack_ix+1];
 			assert(CxTYPE(evalcx) == CXt_EVAL);
-			if(PL_restartop &&
-#if CATCHER_USES_JMPENV
-				evalcx->blk_eval.cur_top_env == PL_top_env
-#else /* !CATCHER_USES_JMPENV */
-				PL_curstackinfo == cursi
-#endif /* !CATCHER_USES_JMPENV */
+			if(PL_restartop
+#if CATCHER_USES_CURSTACKINFO
+				&& PL_curstackinfo == cursi
+#endif /* CATCHER_USES_CURSTACKINFO */
+#if CATCHER_USES_GHOST_JMPENV
+				&& evalcx->blk_eval.cur_top_env == PL_top_env
+#endif /* CATCHER_USES_GHOST_JMPENV */
+#if CATCHER_USES_RESTART_JMPENV
+				&& PL_restartjmpenv == PL_top_env
+#endif /* CATCHER_USES_RESTART_JMPENV */
 			) {
+#if CATCHER_USES_RESTART_JMPENV
+				PL_restartjmpenv = NULL;
+#endif /* CATCHER_USES_RESTART_JMPENV */
 				PL_op = PL_restartop;
 				PL_restartop = NULL;
 				goto runops;

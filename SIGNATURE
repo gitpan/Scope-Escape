@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.61.
+signed via the Module::Signature module, version 0.64.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -16,19 +16,19 @@ Hash: SHA1
 
 SHA1 1d7a103545c57302b44119d0b63f1294c0a898f5 .cvsignore
 SHA1 3c345ce7acb507b3de08893f885ddaa3cf356f54 Build.PL
-SHA1 2cdd53e496a3ae66cade7de86aad5c30bed54422 Changes
+SHA1 73185d9540a045ffc14b59caf14d55573d08b91c Changes
 SHA1 04973598d1f5533138fcc651a8528910ae7bdbdd MANIFEST
-SHA1 3cfb8b29061bd07dcd4c5397433c7637ad3d0f89 META.yml
-SHA1 f770a9a0c886cde55403b1c006cc902fab1c7c31 Makefile.PL
+SHA1 804ffbfcb97be4db709c0b74731b24c3293051fc META.yml
+SHA1 cbe646e9eec8e4cf1175c7fd8cb87a31ad241a82 Makefile.PL
 SHA1 ffa8ba5667e31873781fa4fc8de8a001a6319fc5 README
 SHA1 da97efc18cd78eb50b0eb2f58aad47b6ed399e8c lib/Scope/.cvsignore
-SHA1 06dfb49d27135165516b9c553aecf42f6f734d1c lib/Scope/Escape.pm
-SHA1 f057eceeacbe0dbe883cef44217ddd70ffb310fe lib/Scope/Escape.xs
+SHA1 8a514bd0daeda29ee88b02df9c3798e0657f6b17 lib/Scope/Escape.pm
+SHA1 844b8f211dcfefd9baff6fdd7b87cc0e63cfce3f lib/Scope/Escape.xs
 SHA1 dcca0ef558ca5f614bf0571290af7203e49a8a4c lib/Scope/Escape/Continuation.pod
 SHA1 e0075d9fa9530701d2f6a0ba72b5c9a9bc97e948 t/catcher_escape.t
 SHA1 1a457848ed1023c7458188e190810d7a23ab2090 t/catcher_eval.t
 SHA1 d53d8b9994c1d727499c6079aa3a112649a09aa6 t/cross_stacks.t
-SHA1 e5e663e0a243a2568c9dce55804f3d9ede27905b t/die.t
+SHA1 36a679ee40f96d5f76cf3b7939082274e0d28721 t/die.t
 SHA1 9b224d251b97b9737f62d4be16087c2eb7e98ad9 t/eval_barrier.t
 SHA1 2d74cdfe25c3d9fa12c2c23fab63ae0f5d81e028 t/eval_barrier_req.pl
 SHA1 355061fedfe57511686f1d00794adf1d47dfa0ac t/extent.t
@@ -47,7 +47,7 @@ SHA1 b1405dc840ef50fdedde9d4abac03c9f64f3f511 t/from_loop_while.t
 SHA1 bf2f0283144b16a780cc3bbd6aa0ff11956f1f43 t/from_null.t
 SHA1 fa62e470a92f349e70d6022460a0800b95157d59 t/from_sub.t
 SHA1 e362565876d4a901d5194ed7d7542dff64bfe8ec t/leximport.t
-SHA1 a8cd73f60dc3680d33a13708aa8f42443805ed70 t/multi.t
+SHA1 853abbc665b5c67b370369818ed92df771c79a6a t/multi.t
 SHA1 e75c9529fd53e7ce1dd3e4ebd234614d91f06df2 t/object.t
 SHA1 b65c8128a67d4d1885128e6fcc039b05dd4ea12c t/op_as_function.t
 SHA1 7778806eb20abc15ff0cb95fa267f5a58390b66c t/peep.t
@@ -57,7 +57,7 @@ SHA1 fa6eadc8c57b7073fef349f5fd1cf535888679e7 t/repackage.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.9 (GNU/Linux)
 
-iEYEARECAAYFAkuyXD0ACgkQOV9mt2VyAVEU/QCfTKX6IyuekECMeK+U/hp65Pvx
-8CgAoIPQ4yHM+RgHZ2A281GVggCqUUuq
-=hnjN
+iEYEARECAAYFAkv5WlsACgkQOV9mt2VyAVGHUACeMa3Q/Nqk0u77EHmJBVX3OF3v
+KKAAoIpVFET9EG2sKBCVUI4L/eHbagnN
+=VuL7
 -----END PGP SIGNATURE-----
