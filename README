@@ -12,7 +12,7 @@ can then be returned from, at (nearly) any time while it still exists,
 via the reified continuation.  This applies not only to subroutine stack
 frames, but also to intermediate frames for code blocks, and other kinds
 of stack frame.  This facility can be used directly, or wrapped up to
-build a more structured facility.
+build a more structured facility, as is done by Scope::Escape::Sugar.
 
 The system of reified escape continuations is fundamentally different
 from Perl's native "eval"/"die" exception facility.  With "die", the code

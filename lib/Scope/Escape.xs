@@ -1,3 +1,4 @@
+#define PERL_NO_GET_CONTEXT 1
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -13,18 +14,23 @@
 #endif /* !CvISXSUB */
 
 #ifndef CvISXSUB_on
-# define CvISXSUB_on(cv) ((cv), 0)
+# define CvISXSUB_on(cv) ((void) (cv))
 #endif /* !CvISXSUB_on */
 
 #ifndef Newx
 # define Newx(v,n,t) New(0,v,n,t)
 #endif /* !Newx */
 
+#ifndef gv_stashpvs
+# define gv_stashpvs(name, flags) gv_stashpvn(""name"", sizeof(name)-1, flags)
+#endif /* !gv_stashpvs */
+
 #ifndef newSV_type
-static SV *newSV_type(svtype type)
+# define newSV_type(type) THX_newSV_type(aTHX_ type)
+static SV *THX_newSV_type(pTHX_ svtype type)
 {
 	SV *sv = newSV(0);
-	SvUPGRADE(sv, type);
+	(void) SvUPGRADE(sv, type);
 	return sv;
 }
 #endif /* !newSV_type */
@@ -89,6 +95,10 @@ static SV *newSV_type(svtype type)
 #define CATCHER_USES_CURSTACKINFO \
 	(!CATCHER_USES_RESTART_JMPENV && !CATCHER_USES_GHOST_JMPENV)
 
+#if CATCHER_USES_GHOST_JMPENV && !PERL_VERSION_GE(5,11,0) && !defined(cxinc)
+# define cxinc() Perl_cxinc(aTHX)
+#endif /* CATCHER_USES_GHOST_JMPENV && <5.11.0 && !cxinc */
+
 /*
  * continuation structure
  *
@@ -140,7 +150,8 @@ struct continuation_guts {
 
 static struct continuation_guts *top_contgut;
 
-static void check_cont_leaveop(struct continuation_guts *contgut)
+#define check_cont_leaveop(contgut) THX_check_cont_leaveop(aTHX_ contgut)
+static void THX_check_cont_leaveop(pTHX_ struct continuation_guts *contgut)
 {
 	PERL_CONTEXT *tgtcx =
 		&contgut->stackinfo->si_cxstack[contgut->cxstackix];
@@ -181,7 +192,9 @@ static void check_cont_leaveop(struct continuation_guts *contgut)
 				if(leaveop_type != OP_LEAVELOOP)
 					goto bad_leaveop_type;
 				if(leaveop != tgtcx->blk_loop_last_op) {
+#if BLK_LOOP_HAS_MY_OP
 					wrong_loop:
+#endif /* BLK_LOOP_HAS_MY_OP */
 					croak("broken continuation: "
 						"leaveop points at "
 						"wrong loop\n");
@@ -212,7 +225,8 @@ enum {
 
 static void xsfunc_go(pTHX_ CV *contsub);
 
-static CV *contsub_from_contref(SV *contref)
+#define contsub_from_contref(contref) THX_contsub_from_contref(aTHX_ contref)
+static CV *THX_contsub_from_contref(pTHX_ SV *contref)
 {
 	CV *contsub;
 	if(!(SvROK(contref) && (contsub = (CV*)SvRV(contref)) &&
@@ -223,25 +237,31 @@ static CV *contsub_from_contref(SV *contref)
 	return contsub;
 }
 
-static SV *contgutsv_from_contsub(CV *contsub)
+#define contgutsv_from_contsub(contsub) \
+	THX_contgutsv_from_contsub(aTHX_ contsub)
+static SV *THX_contgutsv_from_contsub(pTHX_ CV *contsub)
 {
 	return *av_fetch(CvPADLIST(contsub), CONTPAD_GUT, 0);
 }
 
-static struct continuation_guts *contgut_from_contsub(CV *contsub)
+#define contgut_from_contsub(contsub) THX_contgut_from_contsub(aTHX_ contsub)
+static struct continuation_guts *THX_contgut_from_contsub(pTHX_ CV *contsub)
 {
 	return (struct continuation_guts *)
 		SvPVX(contgutsv_from_contsub(contsub));
 }
 
-static struct continuation_guts *contgut_from_contref(SV *contref)
+#define contgut_from_contref(contref) THX_contgut_from_contref(aTHX_ contref)
+static struct continuation_guts *THX_contgut_from_contref(pTHX_ SV *contref)
 {
 	return contgut_from_contsub(contsub_from_contref(contref));
 }
 
 static HV *stash_esccont;
 
-static SV *make_contref_from_contgutsv(SV *contgutsv, bool blessp)
+#define make_contref_from_contgutsv(contgutsv, blessp) \
+	THX_make_contref_from_contgutsv(aTHX_ contgutsv, blessp)
+static SV *THX_make_contref_from_contgutsv(pTHX_ SV *contgutsv, bool blessp)
 {
 	CV *contsub = (CV*)newSV_type(SVt_PVCV);
 	SV *contref = sv_2mortal(newRV_noinc((SV*)contsub));
@@ -262,7 +282,9 @@ static SV *make_contref_from_contgutsv(SV *contgutsv, bool blessp)
 	return contref;
 }
 
-static SV *make_contref_from_contsub(CV *contsub, bool blessp)
+#define make_contref_from_contsub(contsub, blessp) \
+	THX_make_contref_from_contsub(aTHX_ contsub, blessp)
+static SV *THX_make_contref_from_contsub(pTHX_ CV *contsub, bool blessp)
 {
 	AV *padlist;
 	SV **wr_ptr, *wr, *hr;
@@ -533,16 +555,11 @@ static void xsfunc_go(pTHX_ CV *contsub)
 	PERL_CONTEXT *tgtcx;
 	SV *retval;
 	contgut = contgut_from_contsub(contsub);
-	/*warn("requested to go %p (may_be_valid=%d)\n", contgut, contgut->may_be_valid);*/
 	status = cont_status(contgut, CONTSTAT_INACCESSIBLE|G_WANT);
-	if(status & CONTSTAT_INACCESSIBLE) {
-		/*warn("croaking for inaccessibility\n");*/
+	if(status & CONTSTAT_INACCESSIBLE)
 		croak("attempt to transfer past impervious stack frame");
-	}
-	for(cg = top_contgut; cg != contgut; cg = cg->next) {
-		/*warn("abandoning %p (formerly may_be_valid=%d)\n", cg, cg->may_be_valid);*/
+	for(cg = top_contgut; cg != contgut; cg = cg->next)
 		cg->may_be_valid = 0;
-	}
 	switch(status & G_WANT) {
 		default: {
 			retval = &PL_sv_undef;
@@ -563,8 +580,6 @@ static void xsfunc_go(pTHX_ CV *contsub)
 		} break;
 	}
 	tgtstki = contgut->stackinfo;
-	/*warn("unwinding contexts for %p\n", contgut);*/
-	/*warn("in xsfunc_go (target si=%p/cxix=%d, current si=%p/cxix=%d)\n", (char*)contgut->stackinfo, tgtcxix, (char*)PL_curstackinfo, cxstack_ix);*/
 	while(PL_curstackinfo != tgtstki) {
 		dounwind(-1);
 		POPSTACK;
@@ -595,7 +610,6 @@ static void xsfunc_go(pTHX_ CV *contsub)
 		} break;
 	}
 	PL_restartop = contgut->leaveop;
-	/*warn("jumping for %p\n", contgut);*/
 #if CATCHER_USES_GHOST_JMPENV
 	{
 		/*
@@ -672,8 +686,10 @@ static OP *docatch_for_pp_current_escape_continuation(pTHX)
 			return NULL;
 		} /* not reached */
 		case 3: {
+#if CATCHER_USES_GHOST_JMPENV
 			PERL_CONTEXT *evalcx = &cxstack[cxstack_ix+1];
 			assert(CxTYPE(evalcx) == CXt_EVAL);
+#endif /* CATCHER_USES_GHOST_JMPENV */
 			if(PL_restartop
 #if CATCHER_USES_CURSTACKINFO
 				&& PL_curstackinfo == cursi
@@ -840,10 +856,12 @@ static OP *myck_entersub(pTHX_ OP *op)
 
 MODULE = Scope::Escape PACKAGE = Scope::Escape
 
+PROTOTYPES: DISABLE
+
 BOOT:
 	null_end_op.op_type = OP_NULL;
 	null_end_op.op_ppaddr = PL_ppaddr[OP_NULL];
-	stash_esccont = gv_stashpv("Scope::Escape::Continuation", 1);
+	stash_esccont = gv_stashpvs("Scope::Escape::Continuation", 1);
 	next_peep = PL_peepp;
 	PL_peepp = my_peep;
 	nxck_entersub = PL_check[OP_ENTERSUB];
@@ -855,12 +873,14 @@ void
 current_escape_function(...)
 PROTOTYPE:
 CODE:
+	PERL_UNUSED_VAR(items);
 	croak("current_escape_function called as a function");
 
 void
 current_escape_continuation(...)
 PROTOTYPE:
 CODE:
+	PERL_UNUSED_VAR(items);
 	croak("current_escape_continuation called as a function");
 
 void
@@ -868,6 +888,14 @@ _set_sanity_checking(bool new_state)
 PROTOTYPE: $
 CODE:
 	sanity_checking_enabled = new_state;
+
+void
+_fake_short_cxstack()
+PROTOTYPE:
+CODE:
+#if CATCHER_USES_GHOST_JMPENV
+	cxstack_max = cxstack_ix;
+#endif /* CATCHER_USES_GHOST_JMPENV */
 
 MODULE = Scope::Escape PACKAGE = Scope::Escape::Continuation
 

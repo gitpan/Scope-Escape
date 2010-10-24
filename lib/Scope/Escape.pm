@@ -27,7 +27,7 @@ can then be returned from, at (nearly) any time while it still exists,
 via the reified continuation.  This applies not only to subroutine stack
 frames, but also to intermediate frames for code blocks, and other kinds
 of stack frame.  This facility can be used directly, or wrapped up to
-build a more structured facility.
+build a more structured facility, as is done by L<Scope::Escape::Sugar>.
 
 The system of reified escape continuations is fundamentally different
 from Perl's native C<eval>/C<die> exception facility.  With C<die>,
@@ -228,7 +228,7 @@ package Scope::Escape;
 use warnings;
 use strict;
 
-our $VERSION = "0.002";
+our $VERSION = "0.003";
 
 use parent "Exporter";
 our @EXPORT_OK = qw(current_escape_function current_escape_continuation);
@@ -238,7 +238,7 @@ XSLoader::load(__PACKAGE__, $VERSION);
 
 {
 	package Scope::Escape::Continuation;
-	our $VERSION = "0.002";
+	our $VERSION = "0.003";
 }
 
 =head1 OPERATORS

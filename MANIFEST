@@ -12,6 +12,7 @@ lib/Scope/Escape/Continuation.pod
 t/catcher_escape.t
 t/catcher_eval.t
 t/cross_stacks.t
+t/cxinc.t
 t/die.t
 t/eval_barrier.t
 t/eval_barrier_req.pl

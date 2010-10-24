@@ -1,3 +1,30 @@
+version 0.003; 2010-10-24
+
+  * bugfix: for Perls that use the ghost context frame but don't put
+    cxinc() in the API (mainly 5.8.9 and 5.10), provide a reserve
+    definition of cxinc()
+
+  * bugfix: for Perl 5.13.1+, don't assert anything about the ghost
+    context frame that was significant on earlier Perl versions
+
+  * in XS, use gv_stashpvs() wherever appropriate
+
+  * in XS, use PERL_NO_GET_CONTEXT for efficiency
+
+  * in XS, declare "PROTOTYPES: DISABLE" to prevent automatic generation
+    of unintended prototypes
+
+  * in documentation, mention Scope::Escape::Sugar in the first paragraph
+    of the description
+
+  * jump through hoops to avoid compiler warnings
+
+  * use full stricture in test suite
+
+  * in Build.PL, complete declaration of configure-time requirements
+
+  * remove commented-out debugging code
+
 version 0.002; 2010-05-23
 
   * update for new PL_restartjmpenv unwinding mechanism in perl 5.13.1
