@@ -2,12 +2,12 @@ use warnings;
 use strict;
 
 BEGIN {
-	eval { require Scope::Upper; Scope::Upper->VERSION(0.08); };
+	eval { require Scope::Cleanup; Scope::Cleanup->VERSION(0.001); };
 	if($@ ne "") {
 		require Test::More;
-		Test::More::plan(skip_all => "no Scope::Upper");
+		Test::More::plan(skip_all => "no Scope::Cleanup");
 	}
-	*reap = \&Scope::Upper::reap;
+	*establish_cleanup = \&Scope::Cleanup::establish_cleanup;
 }
 
 use Test::More tests => 28;
@@ -32,7 +32,7 @@ sub dotest($$$) {
 		@value = sub {
 			push @events, ["aa0"];
 			$cont_out = current_escape_function;
-			reap {
+			establish_cleanup sub {
 				push @events, ["cc0"];
 				$$act_c->("cc1a", "cc1b") if $act_c;
 			};
@@ -40,7 +40,7 @@ sub dotest($$$) {
 			@value = sub {
 				push @events, ["aa2"];
 				$cont_in = current_escape_function;
-				reap {
+				establish_cleanup sub {
 					push @events, ["bb0"];
 					$$act_b->("bb1a", "bb1b") if $act_b;
 				};

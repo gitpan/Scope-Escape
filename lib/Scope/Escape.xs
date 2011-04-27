@@ -566,17 +566,24 @@ static void xsfunc_go(pTHX_ CV *contsub)
 		} break;
 		case G_SCALAR: {
 			dSP; dMARK;
-			retval = MARK == SP ? &PL_sv_undef : TOPs;
+			if(MARK == SP) {
+				retval = &PL_sv_undef;
+			} else {
+				retval = TOPs;
+				SvREFCNT_inc(retval);
+				sv_2mortal(retval);
+			}
 		} break;
 		case G_ARRAY: {
 			dSP; dMARK;
-			I32 retc = SP - MARK;
+			SV **rets = MARK+1;
+			I32 retc = SP - MARK, i;
 			AV *retav = newAV();
 			retval = (SV*)retav;
 			sv_2mortal(retval);
-			AvREAL_off(retav);
 			av_fill(retav, retc-1);
-			Copy(MARK+1, AvARRAY(retav), retc, SV*);
+			Copy(rets, AvARRAY(retav), retc, SV*);
+			for(i = retc; i--; ) SvREFCNT_inc(rets[i]);
 		} break;
 	}
 	tgtstki = contgut->stackinfo;

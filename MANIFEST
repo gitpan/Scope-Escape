@@ -2,6 +2,7 @@
 Build.PL
 Changes
 MANIFEST
+META.json
 META.yml
 Makefile.PL
 README
@@ -39,4 +40,5 @@ t/peep.t
 t/pod_cvg.t
 t/pod_syn.t
 t/repackage.t
+t/retval_life.t
 SIGNATURE    Added here by Module::Build

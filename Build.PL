@@ -4,7 +4,18 @@ use strict;
 
 use Module::Build;
 
-Module::Build->new(
+Module::Build->subclass(code => q{
+	sub compile_c {
+		my($self, $file, %args) = @_;
+		if($^O eq "MSWin32") {
+			# need NO_XSLOCKS for working longjmp
+			$args{defines} = { %{$args{defines} || {}},
+				NO_XSLOCKS => 1,
+			};
+		}
+		return $self->SUPER::compile_c($file, %args);
+	}
+})->new(
 	module_name => "Scope::Escape",
 	license => "perl",
 	configure_requires => {

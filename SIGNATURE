@@ -14,22 +14,23 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 1d7a103545c57302b44119d0b63f1294c0a898f5 .cvsignore
-SHA1 ece42c7c7d4cde33c3497e146416236a53a31dee Build.PL
-SHA1 86a1da9542b8a3a8788d79365698e6e432481ace Changes
-SHA1 1558831eecdd33cb5818642232667bcadc15895a MANIFEST
-SHA1 72414df39d8922330f6e132a7dcde9fcd911c2ee META.yml
-SHA1 cbe646e9eec8e4cf1175c7fd8cb87a31ad241a82 Makefile.PL
-SHA1 8f0bfd03a1599a76115a2a093c111a9832cb37ee README
+SHA1 2e316e3644dcdb78c4d7235eda193a5e495de6b7 .cvsignore
+SHA1 700666988c988a9f1ef2258c07fdff853304dce6 Build.PL
+SHA1 beab60906b294529d48f38e58e77f24061b5afe5 Changes
+SHA1 3ea06ab671afdb9caba144b68ca5cd8f14f6d1f2 MANIFEST
+SHA1 d5669a96dc9957d610bf756a5dd7febda0577d25 META.json
+SHA1 06603c6701391cf761aa6ee4c442c0fecc636ecf META.yml
+SHA1 53380dfd209add8663abe51f6ee717b92e03c861 Makefile.PL
+SHA1 96c32044be56ef5fb86408975a9b2743c6548365 README
 SHA1 da97efc18cd78eb50b0eb2f58aad47b6ed399e8c lib/Scope/.cvsignore
-SHA1 823fc2cc69cc0cea99656d44ded23b6c6cc99c9a lib/Scope/Escape.pm
-SHA1 e4a2d2a9e4b692aea5d7ae91b1d43d3deca3488a lib/Scope/Escape.xs
-SHA1 dcca0ef558ca5f614bf0571290af7203e49a8a4c lib/Scope/Escape/Continuation.pod
+SHA1 330d986f8b90d763f4e9f1f86946b9e2c2431371 lib/Scope/Escape.pm
+SHA1 1957b47e9bb8cad659dcc11d6c99fac68e721eae lib/Scope/Escape.xs
+SHA1 ef33fc3a354df784778da424be13bccabaab23be lib/Scope/Escape/Continuation.pod
 SHA1 e0075d9fa9530701d2f6a0ba72b5c9a9bc97e948 t/catcher_escape.t
 SHA1 1a457848ed1023c7458188e190810d7a23ab2090 t/catcher_eval.t
 SHA1 d53d8b9994c1d727499c6079aa3a112649a09aa6 t/cross_stacks.t
 SHA1 8b290ca64392952e05f9a0942b16e3a3efcf0854 t/cxinc.t
-SHA1 36a679ee40f96d5f76cf3b7939082274e0d28721 t/die.t
+SHA1 a29b6f587ff2eac2cad759711f5c820502761ec0 t/die.t
 SHA1 9b224d251b97b9737f62d4be16087c2eb7e98ad9 t/eval_barrier.t
 SHA1 2d74cdfe25c3d9fa12c2c23fab63ae0f5d81e028 t/eval_barrier_req.pl
 SHA1 355061fedfe57511686f1d00794adf1d47dfa0ac t/extent.t
@@ -48,17 +49,18 @@ SHA1 b1405dc840ef50fdedde9d4abac03c9f64f3f511 t/from_loop_while.t
 SHA1 bf2f0283144b16a780cc3bbd6aa0ff11956f1f43 t/from_null.t
 SHA1 fa62e470a92f349e70d6022460a0800b95157d59 t/from_sub.t
 SHA1 e362565876d4a901d5194ed7d7542dff64bfe8ec t/leximport.t
-SHA1 853abbc665b5c67b370369818ed92df771c79a6a t/multi.t
+SHA1 8075ef2e7b1ca7d7dff423c559079e2dbdae55af t/multi.t
 SHA1 e75c9529fd53e7ce1dd3e4ebd234614d91f06df2 t/object.t
 SHA1 b65c8128a67d4d1885128e6fcc039b05dd4ea12c t/op_as_function.t
 SHA1 7778806eb20abc15ff0cb95fa267f5a58390b66c t/peep.t
 SHA1 904d9a4f76525e2303e4b0c168c68230f223c8de t/pod_cvg.t
 SHA1 65c75abdef6f01a5d1588a307f2ddfe2333dc961 t/pod_syn.t
 SHA1 fa6eadc8c57b7073fef349f5fd1cf535888679e7 t/repackage.t
+SHA1 d48402ca8507cc085d4498d5aaa778e740350727 t/retval_life.t
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
+Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAkzEaZQACgkQOV9mt2VyAVGKKQCbB9EyFLvAQX6HF+K24FOMX5gP
-fbcAnjVJ9lUKA3uA7kEeTLecPMrx5VsQ
-=gOS8
+iEYEARECAAYFAk24JFgACgkQOV9mt2VyAVHxsQCdEWW2lHVsiiw8S18sLYHlQ7Uv
+WZUAnjmuBs6JHqi2or85mpMmtWxieNVB
+=47mi
 -----END PGP SIGNATURE-----
